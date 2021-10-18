@@ -256,9 +256,9 @@ public class ChessProject extends JFrame implements MouseListener, MouseMotionLi
 		
 		//rook
 
-		if(pieceName.equals("BlackRook")){
+		if(pieceName.contains("Rook")){
 			if(startX==(newX)||startY==(newY)){
-				if(!piecePresent(e.getX(), e.getY())||checkIfWhite(e.getX(), e.getY())){
+				if(!piecePresent(e.getX(), e.getY())){
 					validMove=true;
 				}
 				else{
@@ -270,61 +270,57 @@ public class ChessProject extends JFrame implements MouseListener, MouseMotionLi
 			}
 		}
 
-		if(pieceName.equals("WhiteRook")){
-			if(startX==(newX)||startY==(newY)){
-				if(!piecePresent(e.getX(), e.getY())||checkIfBlack(e.getX(), e.getY())){
-					validMove=true;
-				}else{
-					validMove=false;
-				}
-			}
-			else{
-				validMove=false;
-			}
-			
-		}
-
 		//bishop movement somewhat has to move diagonal in the first square but after that it can break its rule, also can only go one direction
 		//needs to be updated but its somewhere there -cb
-		if(pieceName.equals("WhiteBishup")){
-			if((newY > (startY))&&(startX > (newX))||(newY < (startY))&&(startX < (newX))){
-				if(!piecePresent(e.getX(), e.getY())||checkIfBlack(e.getX(), e.getY())){
-					validMove=true;
-				}else{
-					validMove=false;
+		if(pieceName.contains("Bishup")){
+			Boolean blocked = false;
+			int distance = Math.abs(startX-newX);
+			if(Math.abs(startX-newX)==Math.abs(startY-newY)){
+				if((startX-newX<0)&&(startY-newY<0) || (startX-newX < 0) && (startY-newY>0) || (startX-newX > 0) && (startY-newY > 0) || (startX-newX > 0 ) && (startY-newY < 0)){
+					for(int i=0; i < distance; i++){
+						if(piecePresent((initialX+(i*75)) , (initialY+(i*75)))){
+							blocked=true;
+						}
+					}
 				}
 			}
-			else{
-				validMove=false;
-			}
-			
+
+			if(blocked = true){
+				validMove = false;
+			}else if(piecePresent(initialX,initialY)){
+					if(pieceName.contains("White")){
+						if(checkIfBlack(newX,newY)){
+							validMove=true;
+						}else{validMove=false;}
+					}else if(pieceName.contains("Black")){
+						if(checkIfWhite(newX,newY)){
+							validMove=true;
+						}else{validMove=false;}
+					}else{validMove=true;}
+			}else{validMove=true;}
+
 		}
 
-		//knight
-		if(pieceName.equals("BlackBishup")){
-			if((newY > (startY))&&(startX > (newX))||(newY < (startY))&&(startX < (newX))){
-				if(!piecePresent(e.getX(), e.getY())||checkIfWhite(e.getX(), e.getY())){
-					validMove=true;
-				}else{
-					validMove=false;
-				}
+		if(pieceName.contains("Knight")){
+		//	if(newX<0||newX>7||newY<0||newX>7){
+			//	validMove=false;
+		//	}else{
+				if((newX==startX+1)&&(newY==startY+2)||(newX==startX-1)&&(newY==startY+2)||(newX==startX+2)&&(newY==startY+1)||(newX==startX-2)&&(newY==startY+1)||(newX==startX+1)
+				&&(newY==startY-2)||(newX==startX-1)&&(newY==startY-2)||(newX==startX+2)&&(newY==startY-1)||(newX==startX-2)&&(newY==startY-1)){
+					if(piecePresent(newX, newY)){
+						if(pieceName.contains("White")){
+							if(checkIfBlack(newX, newY)){ 
+								validMove=true;
+							}else{validMove=false;}
+						}if(pieceName.contains("Black")){
+							if(checkIfWhite(newX, newY)){
+								validMove=true;
+							}else{validMove=false;}
+						}else{validMove=false;}
+					}else{validMove=true;}	
+				}else{validMove=false;}
 			}
-			else{
-				validMove=false;
-			}
-		}
-
-		if(pieceName.equals("WhiteKnight")){
-				if(checkIfWhite(startX ,startY+1)){
-					validMove=false;
-				}else{
-					validMove=true;
-				}
-		}
-
-		if(pieceName.equals("BlackKnight")){
-			validMove=true;
-		}
+	//	}
 
 		//pawn
 
