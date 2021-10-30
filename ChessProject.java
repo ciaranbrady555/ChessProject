@@ -182,6 +182,7 @@ public class ChessProject extends JFrame implements MouseListener, MouseMotionLi
         layeredPane.add(chessPiece, JLayeredPane.DRAG_LAYER);
     }
    
+
     public void mouseDragged(MouseEvent me) {
         if (chessPiece == null) return;
          chessPiece.setLocation(me.getX() + xAdjustment, me.getY() + yAdjustment);
@@ -215,10 +216,11 @@ public class ChessProject extends JFrame implements MouseListener, MouseMotionLi
 
 		int newY = e.getY()/75;
 		int newX = e.getX()/75;	
-	//	Boolean blocked = false;
+		Boolean blocked = false;
 		int yMove =Math.abs(startY-newY);
 		int xMove = Math.abs(startX-newX);
-
+		int distance = Math.abs(startX-newX);
+		
 		//king
 		if(pieceName.equals("BlackKing")){
 			validMove=true;
@@ -229,20 +231,95 @@ public class ChessProject extends JFrame implements MouseListener, MouseMotionLi
 		}
 		
 		//queen
-		if(pieceName.equals("BlackQueen")){
-			validMove = true;
+		if(pieceName.contains("Queen")){
+			if(Math.abs(startX-newX)==Math.abs(startY-newY)){
+				if((startX-newX<0)&&(startY-newY<0)){
+					for(int i=0; i < distance; i++){
+						if(piecePresent((initialX+(i*75)) , (initialY+(i*75)))){
+							blocked=true;
+						}
+					}
+				}else if ((startX-newX < 0) && (startY-newY>0)){
+					for(int i=0; i < distance; i++){
+						if(piecePresent((initialX+(i*75)) , (initialY-(i*75)))){
+							blocked=true;
+						}
+					}
+				}else if((startX-newX > 0) && (startY-newY > 0)){
+					for(int i=0; i < distance; i++){
+						if(piecePresent((initialX-(i*75)) , (initialY+(i*75)))){
+							blocked=true;
+						}
+					}
+				}else if((startX-newX > 0 ) && (startY-newY < 0)){
+					for(int i=0; i < distance; i++){
+						if(piecePresent((initialX-(i*75)) , (initialY-(i*75)))){
+							blocked=true;
+						}
+					}
+				}else{blocked=false;}
+
+			}else if((Math.abs(startX-newX)!=0)&&(Math.abs(startY-newY) == 0) || (Math.abs(startX-newX) == 0)&&(Math.abs(startY-newY) !=0)){
+				if(Math.abs(startX-newX)!=0){
+					if(startX-newX > 0){
+						for(int i=0;i<xMove;i++){
+							if(piecePresent(initialX-(i*75), e.getY())){
+								blocked=true;
+								break;
+							}
+							else{blocked=false;}
+						}	
+					}else{
+						for(int i=0;i<xMove;i++){
+							if(piecePresent(initialX+(i*75), e.getY())){
+								blocked=true;
+								break;
+							}else{blocked=false;}
+						}
+					}
+				}else if(Math.abs(startY-newY) !=0){
+					if(startY-newY>0){
+						for(int i=0;i<yMove;i++){
+							if(piecePresent(initialX,initialY+(i*75))){
+								blocked=true;
+								break;
+							}else{blocked=false;}
+						}
+					}
+				}else{
+					if(startY-newY>0){
+						for(int i=0;i<yMove;i++){
+							if(piecePresent(initialX,initialY-(i*75))){
+								blocked=true;
+								break;
+							}else{blocked=false;}
+						}
+					}
+			}
 		}
+
+
+		if(blocked = true){
+			validMove = false;
+		}else if(piecePresent(e.getX(),e.getY())){
+				if(pieceName.contains("White")){
+					if(checkIfBlack(e.getX(),e.getY())){
+						validMove=true;
+					}else{validMove=false;}
+				}else if(pieceName.contains("Black")){
+					if(checkIfWhite(e.getX(),e.getY())){
+						validMove=true;
+					}else{validMove=false;}
+				}else{validMove=true;}
+		}else{validMove=false;}
+	}
 		
-		if(pieceName.equals("WhiteQueen")){
-			validMove=true;
-			
-		}
+		
 		
 		//rook
 		// all movement rules fine
 		// can take friendlies & jump enemies and friendlies
 		if(pieceName.contains("Rook")){
-			Boolean blocked = false;
 			if((Math.abs(startX-newX)!=0)&&(Math.abs(startY-newY) == 0) || (Math.abs(startX-newX) == 0)&&(Math.abs(startY-newY) !=0)){
 				if(Math.abs(startX-newX)!=0){
 					if(startX-newX > 0){
@@ -315,11 +392,10 @@ public class ChessProject extends JFrame implements MouseListener, MouseMotionLi
 		}
 	
 
-		//bishop movement somewhat has to move diagonal in the first square but after that it can break its rule, also can only go one direction
+		//white bishop works consistently but the black piece issue stops me from knowing about the black one
 		//needs to be updated but its somewhere there -cb
 		if(pieceName.contains("Bishup")){
-			Boolean blocked = false;
-			int distance = Math.abs(startX-newX);
+			
 			if(Math.abs(startX-newX)==Math.abs(startY-newY)){
 				if((startX-newX<0)&&(startY-newY<0)){
 					for(int i=0; i < distance; i++){
@@ -455,7 +531,7 @@ public class ChessProject extends JFrame implements MouseListener, MouseMotionLi
 				}				
 			}
 		}
-		//------------------------------//
+		//------------------------------//   
 
 		if(pieceName.equals("WhitePawn")){ //197
 			//movement
@@ -521,7 +597,7 @@ public class ChessProject extends JFrame implements MouseListener, MouseMotionLi
 			}			
 		}
 		//
-		if(!validMove && pieceName.contains("White")){		
+		if(!validMove){		
 			int location=0;
 			if(startY ==0){
 				location = startX;
@@ -535,8 +611,8 @@ public class ChessProject extends JFrame implements MouseListener, MouseMotionLi
 		    panels.add(pieces);			
 		}
 		else{
-			if(success && pieceName.contains("White")){
-				int location = 56 + (newX);
+			if(success){
+				int location = 56 + (e.getX()/75);
 				if (c instanceof JLabel){
 	            	Container parent = c.getParent();
 	            	parent.remove(0);
@@ -544,28 +620,14 @@ public class ChessProject extends JFrame implements MouseListener, MouseMotionLi
 					parent = (JPanel)chessBoard.getComponent(location);
 			    	parent.add(pieces);			
 				}
-			/*	else{
+				else{
 					Container parent = (Container)c;
 	            	pieces = new JLabel( new ImageIcon("WhiteQueen.png") );
 					parent = (JPanel)chessBoard.getComponent(location);
 			    	parent.add(pieces);	            	
 				}
-			}else if(success && pieceName.contains("Black")){
-				int location = 56 - (newX);
-				if (c instanceof JLabel){
-	            	Container parent = c.getParent();
-	            	parent.remove(0);
-					pieces = new JLabel( new ImageIcon("BlackQueen.png") );
-					parent = (JPanel)chessBoard.getComponent(location);
-			    	parent.add(pieces);			
-				}
-				else{
-					Container parent = (Container)c;
-	            	pieces = new JLabel( new ImageIcon("BlackQueen.png") );
-					parent = (JPanel)chessBoard.getComponent(location);
-			    	parent.add(pieces);	            	
-				}*/
-			}else{
+			}
+			else{
 				if (c instanceof JLabel){
 	            	Container parent = c.getParent();
 	            	parent.remove(0);
@@ -578,7 +640,11 @@ public class ChessProject extends JFrame implements MouseListener, MouseMotionLi
 	    		chessPiece.setVisible(true);									
 			}
 		}
-    }
+
+
+
+	}
+    
  
     public void mouseClicked(MouseEvent e) {
 	
